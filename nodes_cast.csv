@@ -1,0 +1,33 @@
+cast_id,movie_id,actor_name,character_id,role_name
+1,M1,Johnny Depp,C1,Jack Sparrow
+1,M2,Johnny Depp,C1,Jack Sparrow
+1,M3,Johnny Depp,C1,Jack Sparrow
+1,M4,Johnny Depp,C1,Jack Sparrow
+1,M5,Johnny Depp,C1,Jack Sparrow
+2,M1,Orlando Bloom,C2,Will Turner
+2,M2,Orlando Bloom,C2,Will Turner
+2,M3,Orlando Bloom,C2,Will Turner
+2,M5,Orlando Bloom,C2,Will Turner
+3,M1,Keira Knightley,C3,Elizabeth Swann
+3,M2,Keira Knightley,C3,Elizabeth Swann
+3,M3,Keira Knightley,C3,Elizabeth Swann
+3,M5,Keira Knightley,C3,Elizabeth Swann
+4,M1,Geoffrey Rush,C4,Hector Barbossa
+4,M2,Geoffrey Rush,C4,Hector Barbossa
+4,M3,Geoffrey Rush,C4,Hector Barbossa
+4,M4,Geoffrey Rush,C4,Hector Barbossa
+4,M5,Geoffrey Rush,C4,Hector Barbossa
+5,M1,Kevin McNally,C5,Joshamee Gibbs
+5,M2,Kevin McNally,C5,Joshamee Gibbs
+5,M3,Kevin McNally,C5,Joshamee Gibbs
+5,M4,Kevin McNally,C5,Joshamee Gibbs
+5,M5,Kevin McNally,C5,Joshamee Gibbs
+6,M2,Bill Nighy,C13,Davy Jones
+6,M3,Mark Wherry,C13,Davy Jones
+7,M2,Naomie Harris,C14,Tia Dalma/Calypso
+7,M3,Naomie Harris,C14,Tia Dalma/Calypso
+8,M4,Ian McShane,C19,Blackbeard
+9,M4,Penélope Cruz,C20,Angelica
+10,M5,Brenton Thwaites,C30,Henry Turner
+11,M5,Kaya Scodelario,C31,Carina Smyth/Barbossa
+12,M5,Javier Bardem,C32,Armando Salazar

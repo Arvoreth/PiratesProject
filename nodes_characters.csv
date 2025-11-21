@@ -1,0 +1,33 @@
+id,name,role,faction,status
+C1,Captain Jack Sparrow,Pirate Lord,Brethren Court,Alive
+C2,Will Turner,Blacksmith,Pirate,Alive
+C3,Elizabeth Swann,Governess,Pirate,Alive
+C4,Captain Hector Barbossa,Pirate Lord,Brethren Court,Alive
+C5,Joshamee Gibbs,First Mate,Black Pearl Crew,Alive
+C6,Pintel,Crew Member,Black Pearl Crew,Alive
+C7,Ragetti,Crew Member,Black Pearl Crew,Alive
+C8,Marty,Crew Member,Black Pearl Crew,Alive
+C9,Cotton,Crew Member,Black Pearl Crew,Alive
+C10,Cotton's Parrot,Animal,Black Pearl Crew,Alive
+C11,Anamaria,Pirate,Independent,Alive
+C12,Bootstrap Bill Turner,Crew Member,Flying Dutchman,Undead
+C13,Davy Jones,Captain,Flying Dutchman,Undead
+C14,Tia Dalma/Calypso,Sea Goddess,Independent,Alive
+C15,James Norrington,Navy Officer,Royal Navy,Dead
+C16,Cutler Beckett,Chairman,EITC,Dead
+C17,Weatherby Swann,Governer,Royal Navy,Dead
+C18,Jack the Monkey,Pet,Black Pearl Crew,Alive
+C19,Blackbeard,Captain,Pirate,Dead
+C20,Angelica,Pirate,Pirate,Alive
+C21,Captain Sao Feng,Pirate Lord,Brethren Court,Dead
+C22,Mistress Ching,Pirate Lord,Brethren Court,Alive
+C23,Captain Teague,Pirate Lord,Brethren Court,Alive
+C24,Hadras,Crew Member,Flying Dutchman,Undead
+C25,Clanker,Crew Member,Flying Dutchman,Undead
+C26,Koleniko,Crew Member,Flying Dutchman,Undead
+C27,Jimmylegs,Crew Member,Flying Dutchman,Undead
+C28,Philip Swift,Missionary,Independent,Unknown
+C29,Syrena,Mermaid,Independent,Alive
+C30,Henry Turner,Navy Officer,Royal Navy,Alive
+C31,Carina Smyth/Barbossa,Astronomer,Independent,Alive
+C32,Armando Salazar,Captain,Spanish Navy,Undead
