@@ -17,13 +17,13 @@ LOAD CSV WITH HEADERS FROM 'https://raw.githubusercontent.com/Arvoreth/PiratesPr
 CREATE (:Movie {
   id: row.id,
   title: row.title,
-  releaseyear: toInteger(row.releaseyear),
-  budgetinmillion: toInteger(row.budgetinmillion)
+  release_year: row.release_year,
+  budget_in_million: row.budget_in_million
 });
 ```
 
 to check: 
-MATCH (m.Movie) RETURN m
+MATCH (n) RETURN n
 
 
 #### load character nodes
@@ -37,13 +37,15 @@ CREATE (:Character {
   status: row.status
 });
 ```
+to check: 
+MATCH (c:Character) RETURN c
 
 #### load cast nodes
 ```
 LOAD CSV WITH HEADERS FROM 'https://raw.githubusercontent.com/Arvoreth/PiratesProject/refs/heads/main/nodes_cast.csv' AS row
 CREATE (:Cast {
-  id: row.castid,
-  actorname: row.actorname
+  id: row.cast_id,
+  actor_name: row.actor_name
 });
 ```
 
@@ -59,8 +61,12 @@ CREATE (c)-[:APPEARS_IN]->(m);
 
 #### load cast-character relationships
 ```
-{not working correctly as of right now}
+LOAD CSV WITH HEADERS FROM 'https://raw.githubusercontent.com/Arvoreth/PiratesProject/refs/heads/main/relationships_cast.csv' AS row
+MATCH (c:Character {id: row.character_id})
+MATCH (a:Cast {id: row.cast_id})
+CREATE (c)-[:PLAYED_BY]->(a);
 ```
+(creates 32 relationships --> missing connection to movies!)
 
 #### load character-character relationships
 ```
@@ -70,6 +76,6 @@ MATCH (c2:Character {id: row.character_id_2})
 MATCH (m:Movie {id: row.movie_id})
 CREATE (c1)-[r:RELATIONSHIP {type: row.type, movie: row.movie_id}]->(c2);
 ```
-(sets 100 properties, creates 50 relationships)
+(sets 100 properties, creates 50 relationships --> fix visual display from arrow labeling "relationship" to the **type** of relationship)
 
 
