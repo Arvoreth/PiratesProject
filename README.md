@@ -100,17 +100,16 @@ MATCH (c2:Character {id: row.character_id_2})
 MATCH (m:Movie {id: row.movie_id})
 CREATE (c1)-[r:RELATIONSHIP {type: row.type, movie: row.movie_id}]->(c2);
 ```
-(sets 100 properties, creates 50 relationships --> fix visual display from arrow labeling "relationship" to the **type** of relationship)
+(sets 100 properties, creates 50 relationships --> fix visual display from arrow labeling "relationship" to the **type** of relationship using APOC in neo4j desktop)
 
-**to check every node pair connected by a relationship:** ```MATCH (a)-[r]->(b) RETURN a, r, b```
+**to check every node pair connected by a relationship:** ```MATCH (a)-[r]->(b) RETURN a, r, b``` (add LIMIT 100)
 
-
-#### load character-crew relationships
-```
-
-```
 
 #### load ship-location relationships
 ```
-
+WITH HEADERS FROM 'https://raw.githubusercontent.com/Arvoreth/PiratesProject/refs/heads/main/Data/relationships_ship_locations.csv' AS row
+MATCH (s:Ship {id: row.ship_id})
+MATCH (l:Location {id: row.location_id})
+CREATE (s)-[r:ROUTE {movie_id: row.movie_id, type: row.type}]->(l);
 ```
+(not done testing yet)
