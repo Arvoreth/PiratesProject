@@ -9,6 +9,13 @@ This project involves the creation of an interactive web application that connec
 
 #### The goal is to demonstrate how graph databases can effectively represent and analyze complex relationships in a creative domain, and provide hands-on experience with Neo4j and full-stack web development.
 ---
+### Neo4j Aura Instance
+- username: neo4j
+- password: 
+```
+tBK-JbL-H5JoFSa1dukekgeEw1fO8o3AP-y-PEIh2GE
+```
+---
 ### Cypher Commands in Neo4j
 
 #### load movie nodes
@@ -46,7 +53,8 @@ MATCH (c:Character) RETURN c
 LOAD CSV WITH HEADERS FROM 'https://raw.githubusercontent.com/Arvoreth/PiratesProject/refs/heads/main/Data/nodes_cast.csv' AS row
 CREATE (:Cast {
   id: row.cast_id,
-  actor_name: row.actor_name
+  actor_name: row.actor_name,
+  movie: row.movie_id
 });
 ```
 
@@ -71,25 +79,16 @@ CREATE (:Location {
 });
 ```
 
-#### load character-movie relationships
-```
-LOAD CSV WITH HEADERS FROM 'https://raw.githubusercontent.com/Arvoreth/PiratesProject/refs/heads/main/Data/relationships_movies.csv' AS row
-MATCH (c:Character {id: row.character_id})
-MATCH (m:Movie {id: row.movie_id})
-CREATE (c)-[:APPEARS_IN]->(m);
-```
-(creates 76 relationships)
-
-
-#### load cast-character relationships
+#### load cast-character-movie relationships
 ```
 LOAD CSV WITH HEADERS FROM 'https://raw.githubusercontent.com/Arvoreth/PiratesProject/refs/heads/main/Data/relationships_cast.csv' AS row
 MATCH (c:Character {id: row.character_id})
 MATCH (a:Cast {id: row.cast_id})
 MATCH (m:Movie {id: row.movie_id})
-CREATE (c)-[:PLAYED_BY]->(a);
+CREATE (c)-[:PLAYED_BY]->(a)
+CREATE (c)-[:APPEARS_IN]->(m);
 ```
-(creates 32 relationships --> how to avoid doubles / characterize by movie?)
+(creates 240 relationships) --> how to avoid doubles / characterize by movie? (might need to fix csv)
 
 
 #### load character-character relationships
@@ -107,9 +106,11 @@ CREATE (c1)-[r:RELATIONSHIP {type: row.type, movie: row.movie_id}]->(c2);
 
 #### load ship-location relationships
 ```
-WITH HEADERS FROM 'https://raw.githubusercontent.com/Arvoreth/PiratesProject/refs/heads/main/Data/relationships_ship_locations.csv' AS row
+LOAD CSV WITH HEADERS FROM 'https://raw.githubusercontent.com/Arvoreth/PiratesProject/refs/heads/main/Data/relationships_ship_locations.csv' AS row
 MATCH (s:Ship {id: row.ship_id})
 MATCH (l:Location {id: row.location_id})
 CREATE (s)-[r:ROUTE {movie_id: row.movie_id, type: row.type}]->(l);
 ```
+MATCH p=()-[:ROUTE]->() RETURN p;
+
 (not done testing yet)
