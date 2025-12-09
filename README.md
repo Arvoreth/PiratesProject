@@ -2,21 +2,15 @@
 ---
 This project involves the creation of an interactive web application that connects to a Neo4j graph database. Users will be able to run live queries and visualize graph data from the Pirates of the Caribbean universe. The project includes:
 
-- Designing a graph data model using CSV datasets for movies, characters, cast, and their relationships.
+- Designing a graph data model using CSV datasets for movies, characters, cast, ships, locations, and their relationships.
 - Importing the data into Neo4j and establishing connections between entities in the database.
 - Building a web application to query and render graph relationships in real-time, using JavaScript visualizations (e.g., Vis.js or D3.js).
 - Implementing a user-friendly interface for searching, exploring, and displaying the graph structure.
 
 #### The goal is to demonstrate how graph databases can effectively represent and analyze complex relationships in a creative domain, and provide hands-on experience with Neo4j and full-stack web development.
 ---
-### Neo4j Aura Instance
-- username: neo4j
-- password: 
-```
-tBK-JbL-H5JoFSa1dukekgeEw1fO8o3AP-y-PEIh2GE
-```
----
-### Cypher Commands in Neo4j
+### Neo4j Aura Instance Cypher Commands
+
 
 #### load movie nodes
 ```
@@ -53,8 +47,7 @@ MATCH (c:Character) RETURN c
 LOAD CSV WITH HEADERS FROM 'https://raw.githubusercontent.com/Arvoreth/PiratesProject/refs/heads/main/Data/nodes_cast.csv' AS row
 CREATE (:Cast {
   id: row.cast_id,
-  actor_name: row.actor_name,
-  movie: row.movie_id
+  actor_name: row.actor_name
 });
 ```
 
@@ -85,13 +78,12 @@ LOAD CSV WITH HEADERS FROM 'https://raw.githubusercontent.com/Arvoreth/Pira
 MATCH (c:Character {id: row.character_id})
 MATCH (a:Cast {id: row.cast_id})
 MATCH (m:Movie {id: row.movie_id})
-CREATE (c)-[:PLAYED_BY]->(a)
-CREATE (c)-[:APPEARS_IN]->(m);
+MERGE (c)-[:PLAYED_BY {movie_id: row.movie_id}]->(a)
+MERGE (c)-[:APPEARS_IN]->(m);
 ```
-(creates 240 relationships) --> how to avoid doubles / characterize by movie? (might need to fix csv)
 
 
-#### load character-character relationships
+#### load character-character relationships (will try to fix the relationship to display the tpye visually)
 ```
 LOAD CSV WITH HEADERS FROM 'https://raw.githubusercontent.com/Arvoreth/PiratesProject/refs/heads/main/Data/relationships_characters.csv' AS row
 MATCH (c1:Character {id: row.character_id_1})
@@ -99,7 +91,6 @@ MATCH (c2:Character {id: row.character_id_2})
 MATCH (m:Movie {id: row.movie_id})
 CREATE (c1)-[r:RELATIONSHIP {type: row.type, movie: row.movie_id}]->(c2);
 ```
-(sets 100 properties, creates 50 relationships --> fix visual display from arrow labeling "relationship" to the **type** of relationship using APOC in neo4j desktop)
 
 **to check every node pair connected by a relationship:** ```MATCH (a)-[r]->(b) RETURN a, r, b``` (add LIMIT 100)
 
@@ -112,5 +103,3 @@ MATCH (l:Location {id: row.location_id})
 CREATE (s)-[r:ROUTE {movie_id: row.movie_id, type: row.type}]->(l);
 ```
 MATCH p=()-[:ROUTE]->() RETURN p;
-
-(not done testing yet)
