@@ -1,105 +1,113 @@
-### Development of a Web Application for Live Graph Queries with Neo4j Database
----
-This project involves the creation of an interactive web application that connects to a Neo4j graph database. Users will be able to run live queries and visualize graph data from the Pirates of the Caribbean universe. The project includes:
+# Pirates of the Caribbean Web Application for Live Graph Queries with Neo4j Database
 
-- Designing a graph data model using CSV datasets for movies, characters, cast, ships, locations, and their relationships.
-- Importing the data into Neo4j and establishing connections between entities in the database.
-- Building a web application to query and render graph relationships in real-time, using JavaScript visualizations (e.g., Vis.js or D3.js).
-- Implementing a user-friendly interface for searching, exploring, and displaying the graph structure.
+A web application for exploring the Pirates of the Caribbean universe using Neo4j graph database. Built for the Knowledge-Based Systems course.
 
-#### The goal is to demonstrate how graph databases can effectively represent and analyze complex relationships in a creative domain, and provide hands-on experience with Neo4j and full-stack web development.
----
-### Neo4j Aura Instance Cypher Commands
+We picked this dataset because the character relationships across 5 movies create a really interesting graph structure: alliances, betrayals, rivalries, and all that pirate drama.
 
+## Project Structure
 
-#### load movie nodes
 ```
-LOAD CSV WITH HEADERS FROM 'https://raw.githubusercontent.com/Arvoreth/PiratesProject/refs/heads/main/Data/nodes_movies.csv' AS row
-CREATE (:Movie {
-  id: row.id,
-  title: row.title,
-  release_year: row.release_year,
-  budget_in_million: row.budget_in_million
-});
+PiratesProject/
+├── Data/                   # CSV files for nodes and relationships
+│   ├── nodes_*.csv         # Character, Ship, Location, Movie, Cast data
+│   ├── relationships_*.csv # How everything connects
+│   └── load_data.cypher    # Import script for Neo4j
+├── WebApplication/
+│   ├── server.py           # Flask backend with all the API endpoints
+│   ├── app.js              # Frontend logic and graph visualization
+│   ├── index.html          # Main page
+│   ├── style.css           # Styling
+│   └── .env                # Database credentials
+└── docker-compose.yml      # Neo4j container setup
 ```
 
-to check: 
-MATCH (n) RETURN n
+## Requirements
 
+- Docker Desktop (for Neo4j)
+- Python 3.8+
+- Modern web browser
 
-#### load character nodes
+## Quick Start
+
+### Option 1: Using the batch files (Windows)
+
 ```
-LOAD CSV WITH HEADERS FROM 'https://raw.githubusercontent.com/Arvoreth/PiratesProject/refs/heads/main/Data/nodes_characters.csv' AS row
-CREATE (:Character {
-  id: row.id,
-  name: row.name,
-  role: row.role,
-  faction: row.faction,
-  status: row.status
-});
-```
-to check: 
-MATCH (c:Character) RETURN c
-
-
-#### load cast nodes
-```
-LOAD CSV WITH HEADERS FROM 'https://raw.githubusercontent.com/Arvoreth/PiratesProject/refs/heads/main/Data/nodes_cast.csv' AS row
-CREATE (:Cast {
-  id: row.cast_id,
-  actor_name: row.actor_name
-});
+setup.bat    # First time setup - installs everything
+run.bat      # Starts the application
 ```
 
-#### load ship nodes
+### Option 2: Manual setup
+
+1. Start Neo4j with Docker:
 ```
-LOAD CSV WITH HEADERS FROM 'https://raw.githubusercontent.com/Arvoreth/PiratesProject/refs/heads/main/Data/nodes_ships.csv' AS row
-CREATE (:Ship {
-  id: row.id,
-  ship_name: row.ship_name,
-  type: row.type,
-  captain: row.captain
-});
+docker-compose up -d
 ```
 
-#### load location nodes
+2. Wait about 30 seconds for Neo4j to initialize, then load the data:
 ```
-LOAD CSV WITH HEADERS FROM 'https://raw.githubusercontent.com/Arvoreth/PiratesProject/refs/heads/main/Data/nodes_locations.csv' AS row
-CREATE (:Location {
-  id: row.id,
-  location_name: row.location_name,
-  description: row.description
-});
+docker exec -i pirates-neo4j cypher-shell -u neo4j -p piratesproject < Data/load_data.cypher
 ```
 
-#### load cast-character-movie relationships
+Or manually via Neo4j Browser at http://localhost:7474 (login: neo4j / piratesproject)
+
+3. Install Python dependencies and start the server:
 ```
-LOAD CSV WITH HEADERS FROM 'https://raw.githubusercontent.com/Arvoreth/PiratesProject/refs/heads/main/Data/relationships_cast.csv' AS row
-MATCH (c:Character {id: row.character_id})
-MATCH (a:Cast {id: row.cast_id})
-MATCH (m:Movie {id: row.movie_id})
-MERGE (c)-[:PLAYED_BY {movie_id: row.movie_id}]->(a)
-MERGE (c)-[:APPEARS_IN]->(m);
+cd WebApplication
+pip install -r requirements.txt
+python server.py
 ```
 
+4. Open http://localhost:5000
 
-#### load character-character relationships (will try to fix the relationship to display the tpye visually)
+## Features
+
+### Graph Views
+- **Full Graph** - Everything at once, all nodes and relationships
+- **Characters** - Character nodes with their relationships
+- **Ship Routes** - Which ships traveled to which locations
+- **Rivalries** - Focus on conflicts (enemies, betrayals, etc)
+- **Factions** - Characters grouped by allegiance
+
+### Interactive Features
+- **Six Degrees** - Find the shortest path between any two characters (like Six Degrees of Kevin Bacon)
+- **Leaderboard** - Stats on most connected characters, most enemies, etc
+- **Fortune Teller** - Random adventure generator using the database
+- **Pirate Name** - Get your own pirate identity
+- Search and filter functionality
+- Click nodes for details
+
+## Data Model
+
 ```
-LOAD CSV WITH HEADERS FROM 'https://raw.githubusercontent.com/Arvoreth/PiratesProject/refs/heads/main/Data/relationships_characters.csv' AS row
-MATCH (c1:Character {id: row.character_id_1})
-MATCH (c2:Character {id: row.character_id_2})
-MATCH (m:Movie {id: row.movie_id})
-CREATE (c1)-[r:RELATIONSHIP {type: row.type, movie: row.movie_id}]->(c2);
+(Character)-[:APPEARS_IN]->(Movie)
+(Character)-[:PLAYED_BY]->(Cast)
+(Character)-[:RELATIONSHIP {type, movie}]->(Character)
+(Ship)-[:ROUTE {type, movie_id}]->(Location)
 ```
 
-**to check every node pair connected by a relationship:** ```MATCH (a)-[r]->(b) RETURN a, r, b``` (add LIMIT 100)
+Relationship types: ALLY, ENEMY, RIVALRY, LOVE, FAMILY, CREW, BETRAYED, MISTRUST, and more.
 
+## API Endpoints
 
-#### load ship-location relationships
-```
-LOAD CSV WITH HEADERS FROM 'https://raw.githubusercontent.com/Arvoreth/PiratesProject/refs/heads/main/Data/relationships_ship_locations.csv' AS row
-MATCH (s:Ship {id: row.ship_id})
-MATCH (l:Location {id: row.location_id})
-CREATE (s)-[r:ROUTE {movie_id: row.movie_id, type: row.type}]->(l);
-```
-MATCH p=()-[:ROUTE]->() RETURN p;
+| Endpoint | Description |
+|----------|-------------|
+| GET /api/health | Check Neo4j connection |
+| GET /api/characters | All characters |
+| GET /api/characters/relationships | Character-to-character relationships |
+| GET /api/relationships/:movieId | Relationships filtered by movie |
+| GET /api/ships/routes | Ship routes to locations |
+| GET /api/rivalries | Enemy/betrayal relationships |
+| GET /api/factions | Characters grouped by faction |
+| GET /api/graph/full | Complete graph data |
+| GET /api/search?q= | Search across all entities |
+| GET /api/path/:char1/:char2 | Shortest path between characters |
+| GET /api/leaderboard | Character statistics |
+| GET /api/fortune | Random adventure |
+| GET /api/pirate-name | Generate pirate name |
+
+## Technologies
+
+- Neo4j 5.15 - Graph database
+- Flask - Python web framework
+- vis-network - Graph visualization library
+- HTML/CSS/JS - Frontend

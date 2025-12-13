@@ -3,26 +3,166 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Neo4J Project</title>
-    <link rel="stylesheet" href="style.css">
-    <!-- Vis.js CDN for interactive graph visualization -->
-    <script type="text/javascript" src="https://unpkg.com/vis-network/dist/vis-network.min.js"></script>
-    <link href="https://unpkg.com/vis-network/dist/vis-network.min.css" rel="stylesheet" />
+    <title>Pirates of the Caribbean - Graph Explorer</title>
+    <link rel="stylesheet" href="style.css?v=4">
+    <link href="https://fonts.googleapis.com/css2?family=Pirata+One&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
 </head>
 <body>
     <header>
-        <!-- temporary AI code made with perplexity to test neo4j database connection and graph queries -->
-        <h1>Pirates of the Caribbean Universe</h1>
-        <p>Search for legendary pirates, ships, and adventures!</p>
-        <input id="searchInput" type="text" placeholder="Find a pirate or ship...">
-        <button onclick="runSearch()">Search</button>
-      </header>
-      <main>
-        <div id="graph" style="width: 800px; height: 500px; background: #1a212e; border: 3px solid #7c5700;"></div>
-      </main>
-      <footer>
-        <p>Crafted by the Brethren Court, 2025</p>
-      </footer>
-      <script src="app.js"></script>
+        <h1>Pirates of the Caribbean</h1>
+        <p class="subtitle">Graph Database Explorer</p>
+    </header>
+
+    <nav class="query-nav">
+        <button class="query-btn active" data-query="full">Full Graph</button>
+        <button class="query-btn" data-query="characters">Characters</button>
+        <button class="query-btn" data-query="ships">Ship Routes</button>
+        <button class="query-btn" data-query="rivalries">Rivalries</button>
+        <button class="query-btn" data-query="factions">Factions</button>
+        <span class="nav-divider">|</span>
+        <button class="fun-btn" onclick="openSixDegrees()">Six Degrees</button>
+        <button class="fun-btn" onclick="showLeaderboard()">Leaderboard</button>
+        <button class="fun-btn" onclick="getFortune()">Fortune Teller</button>
+        <button class="fun-btn" onclick="generatePirateName()">Pirate Name</button>
+        <button class="fun-btn rum-btn" onclick="drinkRum()">Rum</button>
+    </nav>
+
+    <main>
+        <div class="controls">
+            <div class="search-box">
+                <input id="searchInput" type="text" placeholder="Search pirates, ships, locations...">
+                <button onclick="runSearch()">Search</button>
+            </div>
+            <div class="filter-box">
+                <label>Filter by Movie:</label>
+                <select id="movieFilter">
+                    <option value="">All Movies</option>
+                    <option value="M1">The Curse of the Black Pearl</option>
+                    <option value="M2">Dead Man's Chest</option>
+                    <option value="M3">At World's End</option>
+                    <option value="M4">On Stranger Tides</option>
+                    <option value="M5">Dead Men Tell No Tales</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="content-wrapper">
+            <div id="graph-container">
+                <div id="graph"></div>
+                <div class="graph-legend">
+                    <span class="legend-item"><span class="dot character"></span> Character</span>
+                    <span class="legend-item"><span class="dot ship"></span> Ship</span>
+                    <span class="legend-item"><span class="dot location"></span> Location</span>
+                    <span class="legend-item"><span class="dot movie"></span> Movie</span>
+                </div>
+            </div>
+
+            <aside id="details-panel">
+                <h3>Node Details</h3>
+                <div id="node-details">
+                    <p class="hint">Click on a node to see details</p>
+                </div>
+                <div id="search-results" class="hidden">
+                    <h4>Search Results</h4>
+                    <ul id="results-list"></ul>
+                </div>
+            </aside>
+        </div>
+
+        <section id="table-view" class="hidden">
+            <h3 id="table-title">Data Table</h3>
+            <div class="table-wrapper">
+                <table id="data-table">
+                    <thead id="table-head"></thead>
+                    <tbody id="table-body"></tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>Crafted by the Brethren Court, 2025 | Knowledge-Based Systems Project</p>
+        <p id="wisdom-quote" class="wisdom-quote"></p>
+    </footer>
+
+    <!-- Modal Overlay -->
+    <div id="modal-overlay" class="modal-overlay hidden" onclick="closeModal()"></div>
+
+    <!-- Six Degrees Modal -->
+    <div id="six-degrees-modal" class="modal hidden">
+        <div class="modal-header">
+            <h2>Six Degrees of Jack Sparrow</h2>
+            <button class="close-btn" onclick="closeModal()">&times;</button>
+        </div>
+        <div class="modal-content">
+            <p>Find the shortest path between any two characters!</p>
+            <div class="path-selector">
+                <select id="char1-select">
+                    <option value="">Select first character...</option>
+                </select>
+                <span class="path-arrow">&#x2194;</span>
+                <select id="char2-select">
+                    <option value="">Select second character...</option>
+                </select>
+            </div>
+            <button onclick="findPath()" class="find-path-btn">Find Connection</button>
+            <div id="path-result" class="path-result"></div>
+        </div>
+    </div>
+
+    <!-- Leaderboard Modal -->
+    <div id="leaderboard-modal" class="modal hidden">
+        <div class="modal-header">
+            <h2>Pirate Leaderboard</h2>
+            <button class="close-btn" onclick="closeModal()">&times;</button>
+        </div>
+        <div class="modal-content">
+            <div id="leaderboard-content" class="leaderboard-grid"></div>
+        </div>
+    </div>
+
+    <!-- Fortune Modal -->
+    <div id="fortune-modal" class="modal hidden">
+        <div class="modal-header">
+            <h2>Pirate Fortune Teller</h2>
+            <button class="close-btn" onclick="closeModal()">&times;</button>
+        </div>
+        <div class="modal-content fortune-content">
+            <div class="crystal-ball"></div>
+            <div id="fortune-text" class="fortune-text"></div>
+            <div id="fortune-details" class="fortune-details"></div>
+            <button onclick="getFortune()" class="new-fortune-btn">Read Another Fortune</button>
+        </div>
+    </div>
+
+    <!-- Pirate Name Modal -->
+    <div id="pirate-name-modal" class="modal hidden">
+        <div class="modal-header">
+            <h2>Yer Pirate Identity</h2>
+            <button class="close-btn" onclick="closeModal()">&times;</button>
+        </div>
+        <div class="modal-content pirate-name-content">
+            <div class="skull-icon">&#9760;</div>
+            <div id="pirate-name-result"></div>
+            <button onclick="generatePirateName()" class="new-name-btn">Generate New Identity</button>
+        </div>
+    </div>
+
+    <!-- Rum Easter Egg -->
+    <div id="rum-modal" class="modal hidden">
+        <div class="modal-header rum-header">
+            <h2>The Rum!</h2>
+            <button class="close-btn" onclick="closeModal()">&times;</button>
+        </div>
+        <div class="modal-content rum-content">
+            <div class="rum-bottle">&#127866;</div>
+            <div id="rum-message" class="rum-message"></div>
+            <div id="rum-counter" class="rum-counter"></div>
+            <button onclick="drinkRum()" class="drink-btn">Drink More Rum</button>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
 </body>
 </html>
