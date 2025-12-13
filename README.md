@@ -4,6 +4,12 @@ A web application for exploring the Pirates of the Caribbean universe using Neo4
 
 We picked this dataset because the character relationships across 5 movies create a really interesting graph structure: alliances, betrayals, rivalries, and all that pirate drama.
 
+## Preview
+
+![alt text](image.png)
+
+![alt text](image-1.png)
+
 ## Project Structure
 
 ```
