@@ -97,33 +97,58 @@ def get_character_connections(character_id):
 
 @app.route('/api/ships/routes')
 def get_ship_routes():
+    movie_id = request.args.get('movie_id')
     try:
         with get_driver().session() as session:
-            result = session.run("""
-                MATCH (s:Ship)-[r:ROUTE]->(l:Location)
-                RETURN s.id as ship_id, s.ship_name as ship_name, s.type as ship_type,
-                       l.id as location_id, l.location_name as location_name,
-                       l.description as location_desc,
-                       r.movie_id as movie_id, r.type as route_type
-                ORDER BY s.ship_name, r.movie_id
-            """)
+            if movie_id:
+                result = session.run("""
+                    MATCH (s:Ship)-[r:ROUTE]->(l:Location)
+                    WHERE r.movie_id = $movie_id
+                    RETURN s.id as ship_id, s.ship_name as ship_name, s.type as ship_type,
+                           l.id as location_id, l.location_name as location_name,
+                           l.description as location_desc,
+                           r.movie_id as movie_id, r.type as route_type
+                    ORDER BY s.ship_name, r.movie_id
+                """, movie_id=movie_id)
+            else:
+                result = session.run("""
+                    MATCH (s:Ship)-[r:ROUTE]->(l:Location)
+                    RETURN s.id as ship_id, s.ship_name as ship_name, s.type as ship_type,
+                           l.id as location_id, l.location_name as location_name,
+                           l.description as location_desc,
+                           r.movie_id as movie_id, r.type as route_type
+                    ORDER BY s.ship_name, r.movie_id
+                """)
             return jsonify([dict(record) for record in result])
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
 @app.route('/api/rivalries')
 def get_rivalries():
+    movie_id = request.args.get('movie_id')
     try:
         with get_driver().session() as session:
-            result = session.run("""
-                MATCH (c1:Character)-[r:RELATIONSHIP]->(c2:Character)
-                WHERE r.type IN ['ENEMY', 'RIVALRY', 'BETRAYED', 'MISTRUST']
-                MATCH (m:Movie {id: r.movie})
-                RETURN c1.name as character1, c2.name as character2,
-                       r.type as conflict_type, m.title as movie,
-                       c1.faction as faction1, c2.faction as faction2
-                ORDER BY m.release_year
-            """)
+            if movie_id:
+                result = session.run("""
+                    MATCH (c1:Character)-[r:RELATIONSHIP]->(c2:Character)
+                    WHERE r.type IN ['ENEMY', 'RIVALRY', 'BETRAYED', 'MISTRUST']
+                      AND r.movie = $movie_id
+                    MATCH (m:Movie {id: r.movie})
+                    RETURN c1.id as char1_id, c1.name as character1, c2.id as char2_id, c2.name as character2,
+                           r.type as conflict_type, m.title as movie, r.movie as movie_id,
+                           c1.faction as faction1, c2.faction as faction2
+                    ORDER BY m.release_year
+                """, movie_id=movie_id)
+            else:
+                result = session.run("""
+                    MATCH (c1:Character)-[r:RELATIONSHIP]->(c2:Character)
+                    WHERE r.type IN ['ENEMY', 'RIVALRY', 'BETRAYED', 'MISTRUST']
+                    MATCH (m:Movie {id: r.movie})
+                    RETURN c1.id as char1_id, c1.name as character1, c2.id as char2_id, c2.name as character2,
+                           r.type as conflict_type, m.title as movie, r.movie as movie_id,
+                           c1.faction as faction1, c2.faction as faction2
+                    ORDER BY m.release_year
+                """)
             return jsonify([dict(record) for record in result])
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -222,14 +247,23 @@ def get_movies():
 
 @app.route('/api/factions')
 def get_factions():
+    movie_id = request.args.get('movie_id')
     try:
         with get_driver().session() as session:
-            result = session.run("""
-                MATCH (c:Character)
-                RETURN c.faction as faction, count(c) as member_count,
-                       collect(c.name) as members
-                ORDER BY member_count DESC
-            """)
+            if movie_id:
+                result = session.run("""
+                    MATCH (c:Character)-[:APPEARS_IN]->(m:Movie {id: $movie_id})
+                    RETURN c.faction as faction, count(c) as member_count,
+                           collect(c.name) as members, collect(c.id) as member_ids
+                    ORDER BY member_count DESC
+                """, movie_id=movie_id)
+            else:
+                result = session.run("""
+                    MATCH (c:Character)
+                    RETURN c.faction as faction, count(c) as member_count,
+                           collect(c.name) as members, collect(c.id) as member_ids
+                    ORDER BY member_count DESC
+                """)
             return jsonify([dict(record) for record in result])
     except Exception as e:
         return jsonify({"error": str(e)}), 500

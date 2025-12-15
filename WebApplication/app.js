@@ -34,8 +34,21 @@ function setupEventListeners() {
     });
 
     document.getElementById('movieFilter').addEventListener('change', (e) => {
-        if (currentQuery === 'full' || currentQuery === 'characters') {
-            filterByMovie(e.target.value);
+        const movieId = e.target.value;
+        switch (currentQuery) {
+            case 'full':
+            case 'characters':
+                filterByMovie(movieId);
+                break;
+            case 'ships':
+                loadShipRoutes(movieId);
+                break;
+            case 'rivalries':
+                loadRivalries(movieId);
+                break;
+            case 'factions':
+                loadFactions(movieId);
+                break;
         }
     });
 
@@ -99,13 +112,24 @@ function initGraph() {
 
 async function executeQuery(queryType) {
     document.getElementById('table-view').classList.add('hidden');
+    const movieId = document.getElementById('movieFilter').value;
 
     switch (queryType) {
-        case 'full': await loadFullGraph(); break;
-        case 'characters': await loadCharacters(); break;
-        case 'ships': await loadShipRoutes(); break;
-        case 'rivalries': await loadRivalries(); break;
-        case 'factions': await loadFactions(); break;
+        case 'full':
+            movieId ? filterByMovie(movieId) : await loadFullGraph();
+            break;
+        case 'characters':
+            movieId ? filterByMovie(movieId) : await loadCharacters();
+            break;
+        case 'ships':
+            await loadShipRoutes(movieId || null);
+            break;
+        case 'rivalries':
+            await loadRivalries(movieId || null);
+            break;
+        case 'factions':
+            await loadFactions(movieId || null);
+            break;
     }
 }
 
@@ -187,9 +211,10 @@ async function loadCharacters() {
     }
 }
 
-async function loadShipRoutes() {
+async function loadShipRoutes(movieId = null) {
     try {
-        const response = await fetch(`${API_BASE}/ships/routes`);
+        const url = movieId ? `${API_BASE}/ships/routes?movie_id=${movieId}` : `${API_BASE}/ships/routes`;
+        const response = await fetch(url);
         const routes = await response.json();
 
         const nodesMap = new Map();
@@ -235,17 +260,18 @@ async function loadShipRoutes() {
     }
 }
 
-async function loadRivalries() {
+async function loadRivalries(movieId = null) {
     try {
-        const response = await fetch(`${API_BASE}/rivalries`);
+        const url = movieId ? `${API_BASE}/rivalries?movie_id=${movieId}` : `${API_BASE}/rivalries`;
+        const response = await fetch(url);
         const rivalries = await response.json();
 
         const nodesMap = new Map();
         const edges = [];
 
         rivalries.forEach((r, i) => {
-            const id1 = r.character1.replace(/\s+/g, '_');
-            const id2 = r.character2.replace(/\s+/g, '_');
+            const id1 = r.char1_id || r.character1.replace(/\s+/g, '_');
+            const id2 = r.char2_id || r.character2.replace(/\s+/g, '_');
 
             if (!nodesMap.has(id1)) {
                 nodesMap.set(id1, {
@@ -291,9 +317,10 @@ async function loadRivalries() {
     }
 }
 
-async function loadFactions() {
+async function loadFactions(movieId = null) {
     try {
-        const response = await fetch(`${API_BASE}/factions`);
+        const url = movieId ? `${API_BASE}/factions?movie_id=${movieId}` : `${API_BASE}/factions`;
+        const response = await fetch(url);
         const factions = await response.json();
 
         const nodes = [];
@@ -311,7 +338,7 @@ async function loadFactions() {
             });
 
             f.members.forEach((member, j) => {
-                const memberId = `member_${i}_${j}`;
+                const memberId = f.member_ids ? f.member_ids[j] : `member_${i}_${j}`;
                 nodes.push({
                     id: memberId,
                     label: member,
