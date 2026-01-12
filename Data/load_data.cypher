@@ -1,18 +1,36 @@
 // Load all nodes
 LOAD CSV WITH HEADERS FROM 'file:///nodes_movies.csv' AS row
-CREATE (:Movie {id: row.id, title: row.title, release_year: row.release_year, budget_in_million: row.budget_in_million});
+MERGE (m:Movie {id: row.id})
+ON CREATE SET
+  m.title             = row.title,
+  m.release_year      = row.release_year,
+  m.budget_in_million = row.budget_in_million;
 
 LOAD CSV WITH HEADERS FROM 'file:///nodes_characters.csv' AS row
-CREATE (:Character {id: row.id, name: row.name, role: row.role, faction: row.faction, status: row.status});
+MERGE (c:Character {id: row.id})
+ON CREATE SET
+  c.name    = row.name,
+  c.role    = row.role,
+  c.faction = row.faction,
+  c.status  = row.status;
 
 LOAD CSV WITH HEADERS FROM 'file:///nodes_cast.csv' AS row
-CREATE (:Cast {id: row.cast_id, actor_name: row.actor_name});
+MERGE (a:Cast {id: row.cast_id})
+ON CREATE SET
+  a.actor_name = row.actor_name;
 
 LOAD CSV WITH HEADERS FROM 'file:///nodes_ships.csv' AS row
-CREATE (:Ship {id: row.id, ship_name: row.ship_name, type: row.type, captain: row.captain});
+MERGE (s:Ship {id: row.id})
+ON CREATE SET
+  s.ship_name = row.ship_name,
+  s.type      = row.type,
+  s.captain   = row.captain;
 
 LOAD CSV WITH HEADERS FROM 'file:///nodes_locations.csv' AS row
-CREATE (:Location {id: row.id, location_name: row.location_name, description: row.description});
+MERGE (l:Location {id: row.id})
+ON CREATE SET
+  l.location_name = row.location_name,
+  l.description   = row.description;
 
 // Create indexes
 CREATE INDEX character_id IF NOT EXISTS FOR (c:Character) ON (c.id);
@@ -32,9 +50,9 @@ MERGE (c)-[:APPEARS_IN]->(m);
 LOAD CSV WITH HEADERS FROM 'file:///relationships_characters.csv' AS row
 MATCH (c1:Character {id: row.character_id_1})
 MATCH (c2:Character {id: row.character_id_2})
-CREATE (c1)-[:RELATIONSHIP {type: row.type, movie: row.movie_id}]->(c2);
+MERGE (c1)-[:RELATIONSHIP {type: row.type, movie: row.movie_id}]->(c2);
 
 LOAD CSV WITH HEADERS FROM 'file:///relationships_ship_locations.csv' AS row
 MATCH (s:Ship {id: row.ship_id})
 MATCH (l:Location {id: row.location_id})
-CREATE (s)-[:ROUTE {movie_id: row.movie_id, type: row.type}]->(l);
+MERGE (s)-[:ROUTE {movie_id: row.movie_id, type: row.type}]->(l);
